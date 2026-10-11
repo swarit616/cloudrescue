@@ -1,0 +1,13 @@
+# Remote state for a LATER phase. Not active: this file is not named *.tf.
+# Use one state key per environment so dev and prod never share state:
+#
+#   terraform init -backend-config="key=cloudrescue/dev/terraform.tfstate"
+#
+# terraform {
+#   backend "s3" {
+#     bucket         = "<your-state-bucket>"      # create separately, versioned + encrypted
+#     region         = "<region>"
+#     dynamodb_table = "<your-lock-table>"
+#     encrypt        = true
+#   }
+# }

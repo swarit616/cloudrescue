@@ -1,0 +1,21 @@
+groups:
+  - name: cloudrescue-local
+    rules:
+      - alert: SimulatedServiceDown
+        expr: cloudrescue_simulated_service_up == 0
+        for: 30s
+        labels:
+          severity: warning
+          simulated: "true"
+        annotations:
+          summary: "SIMULATED failure active"
+          description: "Triggered by POST /api/demo/simulate-failure. This is a local simulation, not a real AWS outage."
+
+      - alert: CloudRescueTargetDown
+        expr: up{job="cloudrescue"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus cannot scrape CloudRescue"
+          description: "The API container is down or unreachable on cloudrescue:8000."

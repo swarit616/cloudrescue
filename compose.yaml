@@ -1,0 +1,58 @@
+# CloudRescue local stack: the API and a minimal Prometheus. Ports bind to localhost only.
+#   docker compose up -d --build
+name: cloudrescue
+
+services:
+  cloudrescue:
+    build:
+      context: .
+    image: cloudrescue:local
+    container_name: cloudrescue-api
+    restart: unless-stopped
+    environment:
+      CLOUDRESCUE_ENV: ${CLOUDRESCUE_ENV:-local}
+      CLOUDRESCUE_LOG_LEVEL: ${CLOUDRESCUE_LOG_LEVEL:-INFO}
+      CLOUDRESCUE_DEMO_ENDPOINTS_ENABLED: ${CLOUDRESCUE_DEMO_ENDPOINTS_ENABLED:-true}
+      CLOUDRESCUE_DEMO_TOKEN: ${CLOUDRESCUE_DEMO_TOKEN:-}
+      CLOUDRESCUE_AWS_REGION: ${CLOUDRESCUE_AWS_REGION:-}
+      CLOUDRESCUE_AWS_INSTANCE_ID: ${CLOUDRESCUE_AWS_INSTANCE_ID:-}
+    ports:
+      - "127.0.0.1:${CLOUDRESCUE_HOST_PORT:-8000}:8000"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: cloudrescue-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=2d"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    ports:
+      - "127.0.0.1:${PROMETHEUS_HOST_PORT:-9090}:9090"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      cloudrescue:
+        condition: service_healthy
+# No named volumes: the app keeps state in memory by design and Prometheus data is
+# disposable for a local demo (it is lost on `docker compose down`).

@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Minimal permissions: the workflow only reads the repository. No AWS credentials are used anywhere.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python (lint, format, tests)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Lint (ruff check)
+        run: ruff check .
+
+      - name: Format check (ruff format)
+        run: ruff format --check .
+
+      - name: Tests
+        run: pytest
+
+  terraform:
+    name: Terraform (fmt, validate)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: terraform fmt
+        run: terraform fmt -check -recursive
+
+      # -backend=false and no credentials: validate never contacts AWS
+      # (init only downloads the provider plugin from the registry).
+      - name: terraform init
+        run: terraform init -backend=false -input=false
+
+      - name: terraform validate
+        run: terraform validate
+
+  docker:
+    name: Docker (build, smoke test)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate compose file
+        run: docker compose config --quiet
+
+      - name: Build image
+        run: docker build -t cloudrescue:ci .
+
+      - name: Smoke test
+        run: |
+          docker run -d --name smoke -p 127.0.0.1:8000:8000 cloudrescue:ci
+          for i in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:8000/health && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8000/api/status
+          curl -fsS http://127.0.0.1:8000/metrics | grep -q cloudrescue_simulated_service_up
+          docker rm -f smoke
