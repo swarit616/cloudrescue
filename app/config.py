@@ -47,6 +47,9 @@ class Settings:
     # Optional shared secret: when set, demo endpoints require the X-Demo-Token header.
     demo_token: str | None = field(default=None, repr=False)
     # Future AWS target (placeholders only; no AWS calls exist in this phase).
+    # Dedicated secret for incoming Alertmanager webhooks.
+    # If unset, webhook ingestion remains disabled.
+    alertmanager_token: str | None = field(default=None, repr=False)
     aws_region: str | None = None
     aws_instance_id: str | None = None
     max_incidents: int = 100
@@ -67,6 +70,7 @@ class Settings:
             log_level=level,
             demo_endpoints_enabled=_bool(env, "CLOUDRESCUE_DEMO_ENDPOINTS_ENABLED", True),
             demo_token=_text(env, "CLOUDRESCUE_DEMO_TOKEN"),
+            alertmanager_token=_text(env, "CLOUDRESCUE_ALERTMANAGER_TOKEN"),
             aws_region=_text(env, "CLOUDRESCUE_AWS_REGION"),
             aws_instance_id=_text(env, "CLOUDRESCUE_AWS_INSTANCE_ID"),
         )
