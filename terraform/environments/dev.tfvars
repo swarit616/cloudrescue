@@ -8,3 +8,6 @@ private_subnet_cidrs = ["10.40.101.0/24"]
 enable_compute       = false
 instance_type        = "t3.micro"
 log_retention_days   = 7
+
+# IAM resources are bootstrapped separately.
+enable_iam_bootstrap = false

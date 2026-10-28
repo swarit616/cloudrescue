@@ -102,3 +102,9 @@ variable "extra_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "enable_iam_bootstrap" {
+  description = "Whether Terraform manages the CloudRescue instance IAM role and profile"
+  type        = bool
+  default     = true
+}

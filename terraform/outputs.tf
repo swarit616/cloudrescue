@@ -25,5 +25,5 @@ output "instance_id" {
 
 output "instance_role_name" {
   description = "IAM role attached to the instance."
-  value       = module.iam.role_name
+  value       = try(module.iam[0].role_name, null)
 }

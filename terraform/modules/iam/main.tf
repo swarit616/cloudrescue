@@ -11,8 +11,9 @@ data "aws_iam_policy_document" "assume_ec2" {
 }
 
 resource "aws_iam_role" "instance" {
-  name               = "${var.name}-instance-role"
-  assume_role_policy = data.aws_iam_policy_document.assume_ec2.json
+  name                 = "${var.name}-instance-role"
+  assume_role_policy   = data.aws_iam_policy_document.assume_ec2.json
+  permissions_boundary = var.permissions_boundary_arn
 }
 
 # Shell access through SSM Session Manager, so no SSH port is needed.

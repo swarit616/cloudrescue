@@ -32,3 +32,9 @@ tfplan
 !.vscode/extensions.json
 .idea/
 .DS_Store
+
+# Local AWS administration files
+/aws-policies/
+
+# Safe public-demo template (contains no real secrets)
+!.env.public.example

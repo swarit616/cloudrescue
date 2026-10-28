@@ -11,6 +11,8 @@ locals {
   )
 }
 
+data "aws_caller_identity" "current" {}
+
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -38,9 +40,11 @@ module "monitoring" {
 
 module "iam" {
   source = "./modules/iam"
+  count  = var.enable_iam_bootstrap ? 1 : 0
 
-  name          = local.name
-  log_group_arn = module.monitoring.log_group_arn
+  name                     = local.name
+  log_group_arn            = module.monitoring.log_group_arn
+  permissions_boundary_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/CloudRescueInstanceBoundary"
 }
 
 module "compute" {
@@ -52,7 +56,7 @@ module "compute" {
   region                = var.aws_region
   vpc_id                = module.network.vpc_id
   subnet_id             = module.network.public_subnet_ids[0]
-  instance_profile_name = module.iam.instance_profile_name
+  instance_profile_name = module.iam[0].instance_profile_name
   instance_type         = var.instance_type
   root_volume_size_gb   = var.root_volume_size_gb
   app_port              = var.app_port
