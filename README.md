@@ -1,12 +1,22 @@
 # CloudRescue
 
-A small, beginner-friendly **incident/recovery simulation** built as a foundation for a later AWS deployment.
-A FastAPI service exposes health, status, incident history and Prometheus metrics, and lets you **simulate** a failure and a
-recovery in memory. Docker Compose runs it with a minimal Prometheus. Terraform describes a future AWS environment, and GitHub Actions
-checks code and Terraform without any AWS credentials.
+A containerised incident/recovery simulation built with FastAPI, Docker, Prometheus, Terraform and GitHub Actions.
 
-> **Honest scope:** this phase is 100% local. **No AWS API is called, no AWS resource exists, and nothing is deployed.**
-> Every incident is *simulated*; none represents a real AWS failure or recovery.
+### Live Demo
+
+- **Application:** https://cloudrescue.onrender.com/
+- **Interactive API documentation:** https://cloudrescue.onrender.com/docs
+- **Health check:** https://cloudrescue.onrender.com/health
+- **Deployment:** Render (Docker, Free instance)
+- **CI:** GitHub Actions
+
+> **Scope:** The public deployment runs a local, in-memory simulation.
+> It does not connect to AWS or perform real infrastructure remediation.
+> Public state-changing demo endpoints are disabled for safety.
+> Incident history resets when the application restarts.
+>
+> Terraform describes a proposed AWS environment. It has been validated
+> and planned, but no Terraform infrastructure has been applied.
 
 ## Why this project
 
@@ -141,7 +151,7 @@ make tf-validate    # terraform fmt -check, init -backend=false, validate (no AW
 
 * Demo endpoints modify **in-memory state only**, but anyone who can reach them can flip the service to "failed" and pollute
   history. They are meant for local use.
-* **Before any public deployment** set `CLOUDRESCUE_DEMO_ENDPOINTS_ENABLED=false` (returns 403) or at least set
+* **For public deployments (including the current Render demo)** set `CLOUDRESCUE_DEMO_ENDPOINTS_ENABLED=false` (returns 403) or at least set
   `CLOUDRESCUE_DEMO_TOKEN` (requires `X-Demo-Token`) *and* restrict the network path. The Terraform compute module already starts the
   container with the demo endpoints disabled.
 * The API has no user accounts; `/metrics`, `/api/status` and `/api/incidents` are unauthenticated.
@@ -159,27 +169,32 @@ Not incurred today. Later: EC2 (small), public IPv4 (~USD 3.60/month), NAT gatew
 | Area | Status |
 |---|---|
 | FastAPI endpoints, simulation, metrics, structured logs | Implemented |
-| pytest suite | Written (see "Verification status") |
-| Dockerfile, Compose, Prometheus + alert rule | Written (see "Verification status") |
-| Terraform: network, iam, compute, monitoring modules | Written, **never planned or applied** |
-| GitHub Actions CI | Written, **has not run on GitHub yet** |
+| pytest suite | 70 tests passed locally |
+| Dockerfile, Compose, Prometheus + alert rule | Implemented; Docker API verified |
+| Public HTTPS deployment | Live on Render (in-memory simulation) |
+| Terraform: network, IAM, compute, monitoring modules | Validated and dev plan reviewed; **not applied** |
+| GitHub Actions CI | Passing on `main` |
 | Real AWS integration (read-only status checks) | **Not implemented** |
 | ECR image publishing, remote state, OIDC deploy roles | Not implemented |
 | ALB, Auto Scaling, NAT gateway, SNS notifications | Not implemented (deferred) |
-| Authentication/authorisation for the API | Not implemented |
+| Authentication/authorisation for the API | Not implemented; public state-changing demo endpoints disabled |
 
 ## Verification status
 
-Fill this in on your machine; do not treat the project as verified until the first three rows pass.
+| Check | Result |
+|---|---|
+| Unit/API tests | **70 passed locally** |
+| Terraform format and validation | **Passed** |
+| Terraform dev plan | Reviewed: 11 additions, 0 changes, 0 destroys; **not applied** |
+| Docker image build | **Passed** |
+| Local Docker health check | **HTTP 200 OK** |
+| Public Render health check | **Verified successfully** |
+| Public Swagger UI | Available at https://cloudrescue.onrender.com/docs |
+| GitHub Actions CI | **Passing** on `main` |
+| Prometheus target | Not freshly verified for this release |
 
-| Check | Command | Result |
-|---|---|---|
-| Unit/API tests | `make test` | _not yet run by you_ |
-| Lint + format | `make format && make lint` | _not yet run by you_ |
-| Docker stack | `make docker-up && make docker-ps` | _not yet run by you_ |
-| Prometheus target UP | http://127.0.0.1:9090/targets | _not yet run by you_ |
-| Terraform | `make tf-validate` | _not yet run by you_ |
-| GitHub Actions | push and open the Actions tab | _not yet run_ |
+The public Render deployment runs the API container, not the full local
+Docker Compose monitoring stack. The Free instance may sleep after inactivity.
 
 ## Troubleshooting
 
