@@ -65,13 +65,9 @@ def test_monitoring_incidents_lifecycle():
     assert data["incidents"][0]["status"] == "resolved"
     assert data["incidents"][0]["resolved_at"] is not None
 
-    assert client.get(
-        "/api/monitoring/incidents?status=open"
-    ).json()["incidents"] == []
+    assert client.get("/api/monitoring/incidents?status=open").json()["incidents"] == []
 
-    assert client.get(
-        "/api/monitoring/incidents?status=resolved"
-    ).json()["count"] == 1
+    assert client.get("/api/monitoring/incidents?status=resolved").json()["count"] == 1
 
 
 def test_monitoring_incidents_query_validation():
