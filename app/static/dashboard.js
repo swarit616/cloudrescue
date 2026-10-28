@@ -71,6 +71,63 @@ function renderIncidents(data) {
   }
 }
 
+
+function renderMonitoring(data) {
+  setValue("monitoring-health", "Connected", "stat-value good");
+  setValue("monitoring-open", data.open_count);
+  setValue("monitoring-resolved", data.resolved_count);
+  setValue("monitoring-total", data.total_count);
+  setValue("monitoring-summary", `${data.count} displayed`);
+
+  const tbody = $("monitoring-rows");
+  tbody.replaceChildren();
+
+  if (!data.incidents.length) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 7;
+    cell.className = "empty-state";
+    cell.textContent = "No monitoring incidents received in this application process.";
+    row.appendChild(cell);
+    tbody.appendChild(row);
+    return;
+  }
+
+  for (const incident of data.incidents) {
+    const row = document.createElement("tr");
+
+    const cells = [
+      incident.alertname,
+      incident.reason,
+      incident.severity,
+      incident.source,
+      incident.status,
+      formatTime(incident.alert_starts_at || incident.started_at),
+      formatTime(incident.alert_ends_at || incident.resolved_at)
+    ];
+
+    cells.forEach((value, index) => {
+      const cell = document.createElement("td");
+      cell.textContent = value ?? "—";
+
+      if (index === 2) {
+        const severity = String(incident.severity).toLowerCase();
+        if (["critical", "warning", "info"].includes(severity)) {
+          cell.classList.add(`severity-${severity}`);
+        }
+      }
+
+      if (index === 4 && ["open", "resolved"].includes(incident.status)) {
+        cell.classList.add(`status-${incident.status}`);
+      }
+
+      row.appendChild(cell);
+    });
+
+    tbody.appendChild(row);
+  }
+}
+
 function renderStatus(data) {
   const state = data.simulated_service.state;
 
@@ -105,10 +162,11 @@ async function refreshDashboard() {
     const results = await Promise.allSettled([
       getJSON("/health"),
       getJSON("/api/status", [200, 503]),
-      getJSON("/api/incidents")
+      getJSON("/api/incidents"),
+      getJSON("/api/monitoring/incidents")
     ]);
 
-    const [health, status, incidents] = results;
+    const [health, status, incidents, monitoring] = results;
     const failures = [];
 
     if (health.status === "fulfilled") {
@@ -137,13 +195,24 @@ async function refreshDashboard() {
       failures.push("incidents");
     }
 
+    if (monitoring.status === "fulfilled") {
+      renderMonitoring(monitoring.value);
+    } else {
+      setValue("monitoring-health", "Unavailable", "stat-value bad");
+      setValue("monitoring-open", "—");
+      setValue("monitoring-resolved", "—");
+      setValue("monitoring-total", "—");
+      setValue("monitoring-summary", "Unavailable");
+      failures.push("monitoring");
+    }
+
     setValue("last-updated", new Date().toLocaleTimeString());
 
     setValue(
       "connection-message",
       failures.length
         ? `Unable to load: ${failures.join(", ")}. Retrying automatically.`
-        : "Connected • Showing current in-memory simulation data."
+        : "Connected • Monitoring and simulation data are separate and stored in memory."
     );
   } finally {
     refreshing = false;

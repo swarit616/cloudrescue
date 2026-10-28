@@ -7,7 +7,9 @@ def test_dashboard_serves_html(client):
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
     assert "CloudRescue | Operations Dashboard" in response.text
-    assert "SIMULATION ONLY" in response.text
+    assert "MONITORING + SIMULATION" in response.text
+    assert "Live Monitoring" in response.text
+    assert "Demo Simulation" in response.text
     assert "/static/style.css" in response.text
     assert "/static/dashboard.js" in response.text
 
