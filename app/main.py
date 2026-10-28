@@ -8,11 +8,13 @@ import time
 import uuid
 from collections.abc import Awaitable, Callable
 from http import HTTPStatus
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import __version__
@@ -106,6 +108,13 @@ def create_app(
         ]
         return JSONResponse(status_code=422, content=body)
 
+    static_dir = Path(__file__).resolve().parent / "static"
+
+    @app.get("/", include_in_schema=False)
+    def dashboard() -> FileResponse:
+        return FileResponse(static_dir / "index.html")
+
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
     app.include_router(router)
     logger.info("startup", extra={"event": "app.started", "context": settings_summary(settings)})
     return app

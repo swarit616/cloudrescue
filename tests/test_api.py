@@ -10,7 +10,7 @@ def parse_time(value: str) -> datetime:
 
 
 def test_root_describes_project_and_links_to_docs(client):
-    response = client.get("/")
+    response = client.get("/api/info")
     assert response.status_code == 200
     body = response.json()
     assert body["name"] == "CloudRescue"

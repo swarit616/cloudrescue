@@ -47,7 +47,7 @@ def require_demo_access(
 DemoGuard = Depends(require_demo_access)
 
 
-@router.get("/", response_model=RootResponse, tags=["info"])
+@router.get("/api/info", response_model=RootResponse, tags=["info"])
 def root(request: Request) -> RootResponse:
     """Project information and links to the interactive API docs."""
     return RootResponse(
