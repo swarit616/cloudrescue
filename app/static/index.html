@@ -19,7 +19,8 @@
       <div class="nav-label">WORKSPACE</div>
       <nav aria-label="Main navigation">
         <a class="nav-link active" href="/">Overview</a>
-        <a class="nav-link" href="#incidents">Incidents</a>
+        <a class="nav-link" href="#monitoring">Live Monitoring</a>
+        <a class="nav-link" href="#incidents">Demo Incidents</a>
         <a class="nav-link" href="/docs">API Documentation ↗</a>
         <a class="nav-link" href="/api/info">Project Information ↗</a>
       </nav>
@@ -45,8 +46,8 @@
       </header>
 
       <div class="notice" role="note">
-        <strong>SIMULATION ONLY</strong>
-        <span>All incidents and recoveries are in-memory demonstrations. No AWS resources are monitored or modified.</span>
+        <strong>MONITORING + SIMULATION</strong>
+        <span>CloudOps360 alerts are received through Alertmanager. Demo failures and recoveries remain separate. Incident history is in-memory and resets when this application restarts. No AWS resources are modified.</span>
       </div>
 
       <p id="connection-message" class="connection-message" role="status" aria-live="polite">
@@ -100,10 +101,75 @@
         </article>
       </section>
 
+      
+      <section id="monitoring" aria-label="Live monitoring">
+        <div class="section-intro">
+          <div>
+            <div class="eyebrow">CLOUDOPS360 / ALERTMANAGER</div>
+            <h2>Live Monitoring</h2>
+            <p>Received infrastructure alerts, separate from local simulations.</p>
+          </div>
+          <span id="monitoring-summary" class="tag muted">Loading</span>
+        </div>
+
+        <div class="stats">
+          <article class="stat-card">
+            <div class="stat-label">MONITORING STATUS</div>
+            <div id="monitoring-health" class="stat-value">Checking…</div>
+            <div class="stat-description">Incident API availability</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-label">OPEN ALERTS</div>
+            <div id="monitoring-open" class="stat-value">—</div>
+            <div class="stat-description">Unresolved received incidents</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-label">RESOLVED ALERTS</div>
+            <div id="monitoring-resolved" class="stat-value">—</div>
+            <div class="stat-description">Resolved received incidents</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-label">TOTAL RECEIVED</div>
+            <div id="monitoring-total" class="stat-value">—</div>
+            <div class="stat-description">Current application process lifetime</div>
+          </article>
+        </div>
+
+        <article class="panel incidents-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Monitoring Incident Timeline</h2>
+              <p>Actual received webhook events. An empty table does not prove that external infrastructure is healthy.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Alert</th><th>Reason</th><th>Severity</th>
+                  <th>Source</th><th>Status</th><th>Started</th><th>Resolved</th>
+                </tr>
+              </thead>
+              <tbody id="monitoring-rows">
+                <tr><td colspan="7" class="empty-state">Loading monitoring incidents…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <div class="section-intro">
+        <div>
+          <div class="eyebrow">LOCAL DEMONSTRATION</div>
+          <h2>Demo Simulation</h2>
+          <p>Independent simulated failures and recoveries. No infrastructure actions.</p>
+        </div>
+      </div>
+
       <section id="incidents" class="panel incidents-panel">
         <div class="panel-heading">
           <div>
-            <h2>Incident Timeline</h2>
+            <h2>Simulated Incident Timeline</h2>
             <p>Most recent simulated incidents in this process.</p>
           </div>
           <span id="incident-summary" class="tag">Loading</span>

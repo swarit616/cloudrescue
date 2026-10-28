@@ -23,6 +23,7 @@ from app.config import Settings
 from app.logging_config import configure_logging, log_event, request_id_var
 from app.metrics import Metrics
 from app.monitoring import MonitoringStore
+from app.monitoring_routes import router as monitoring_router
 from app.routes import router
 from app.state import SimulationState
 
@@ -120,6 +121,7 @@ def create_app(
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
     app.include_router(router)
     app.include_router(alertmanager_router)
+    app.include_router(monitoring_router)
     logger.info("startup", extra={"event": "app.started", "context": settings_summary(settings)})
     return app
 

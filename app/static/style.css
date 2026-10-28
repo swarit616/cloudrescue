@@ -255,3 +255,51 @@ footer {
   .stat-value { font-size: 22px; }
   .live-indicator { font-size: 11px; }
 }
+
+/* Live monitoring and demo section headings */
+.section-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 32px 0 16px;
+}
+
+.section-intro h2 {
+  font-size: 21px;
+  margin: 9px 0 4px;
+}
+
+.section-intro p {
+  margin: 0;
+}
+
+#monitoring {
+  scroll-margin-top: 24px;
+}
+
+#monitoring-rows td {
+  max-width: 340px;
+  overflow-wrap: anywhere;
+}
+
+.severity-critical {
+  color: #ff777c;
+  font-weight: 700;
+}
+
+.severity-warning {
+  color: #f1c86d;
+}
+
+.severity-info {
+  color: #65e9b5;
+}
+
+@media (max-width: 760px) {
+  .section-intro {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
