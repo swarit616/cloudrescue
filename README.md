@@ -212,7 +212,7 @@ Docker Compose monitoring stack. The Free instance may sleep after inactivity.
 
 Cleanup: `docker compose down`, `make clean` (removes `.venv` and caches). Nothing exists in AWS to clean up.
 
-## Interview talking points
+## Talking points
 
 These describe what the code is designed to do; run the checks above before claiming results.
 
@@ -226,7 +226,3 @@ These describe what the code is designed to do; run the checks above before clai
   environment values in tfvars not modules, deferred items listed instead of stub modules.
 * **Honesty about status:** README separates implemented, written-but-unverified and not-implemented work.
 * **CI without secrets:** read-only token, no AWS credentials; OIDC plan documented for later.
-
-## License
-
-Add a license of your choice before publishing.
