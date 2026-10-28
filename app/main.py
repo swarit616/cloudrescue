@@ -18,9 +18,11 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import __version__
+from app.alertmanager import router as alertmanager_router
 from app.config import Settings
 from app.logging_config import configure_logging, log_event, request_id_var
 from app.metrics import Metrics
+from app.monitoring import MonitoringStore
 from app.routes import router
 from app.state import SimulationState
 
@@ -53,6 +55,7 @@ def create_app(
     )
     app.state.settings = settings
     app.state.simulation = simulation
+    app.state.monitoring = MonitoringStore(max_incidents=settings.max_incidents)
     app.state.metrics = Metrics(settings, simulation)
 
     @app.middleware("http")
@@ -116,6 +119,7 @@ def create_app(
 
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
     app.include_router(router)
+    app.include_router(alertmanager_router)
     logger.info("startup", extra={"event": "app.started", "context": settings_summary(settings)})
     return app
 
